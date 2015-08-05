@@ -1,9 +1,15 @@
-require './lib/package_provider/repository'
+$: << 'lib'
 
-repo = PackageProvider::Repository.new('https://ondrej.hosak@stash.cz.avg.com/scm/ddtf/onlinekitchen.git', '/home/vagrant/repos/avg')
+require 'package_provider'
+require 'package_provider/repository'
+
+repo = PackageProvider::Repository.new('https://ondrej.hosak@stash.cz.avg.com/scm/ddtf/onlinekitchen.git', '/home/vagrant/repos/onlinekitchen/')
 #repo = PackageProvider::Repository.new('https://ondrej.hosak@stash.cz.avg.com/scm/ddtf/onlinekitchen.git', '/bla/bla/')
-puts repo.repo_root
+#puts repo.repo_root
 #repo.fetch
+
+repo.clone('/tmp/test_cloned_repo/', nil, ["spec", "*.rb"], false)
+#repo.clone('/tmp/test_cloned_repo2', nil, "*.rb", false)
 #repo.destroy
 
 #repo2 = PackageProvider::Repository.new('https://ondrej.hosak@stash.cz.avg.com/scm/ddtf/onlinekitchen.git')
