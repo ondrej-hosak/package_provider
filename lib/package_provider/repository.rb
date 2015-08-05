@@ -34,7 +34,7 @@ module PackageProvider
         end
 
         o, e, s = Open3.capture3({}, File.join(PackageProvider.root, 'lib', 'scripts', 'clone.sh'), dest_dir, treeish || "HEAD", { chdir: repo_root })
-        processOutput(o,e,s, 'sparse')
+        processOutput(o, e, s, 'sparse')
 
         dest_dir
       rescue
@@ -54,7 +54,7 @@ module PackageProvider
 
     def init_repo!(git_repo_local_root)
       o, e, s = Open3.capture3({}, File.join(PackageProvider.root, 'lib', 'scripts', 'init_repo.sh'), repo_url, git_repo_local_root || "", { chdir: repo_root })
-      processOutput(o,e,s, 'clone')
+      processOutput(o, e, s, 'clone')
     end
 
     def fetch!
@@ -63,8 +63,8 @@ module PackageProvider
     end
 
     def processOutput(stdout, stderr, status, action)
-      puts status
-      if !status.success?
+      #puts status
+      if status != nil && !status.success?
         puts action + " failed:"
         puts stderr
         puts stdout
