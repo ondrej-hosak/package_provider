@@ -8,8 +8,9 @@ repo = PackageProvider::Repository.new('https://ondrej.hosak@stash.cz.avg.com/sc
 #puts repo.repo_root
 #repo.fetch
 
-repo.clone('/tmp/test_cloned_repo/', nil, ["spec", "*.rb"], false)
-#repo.clone('/tmp/test_cloned_repo2', nil, "*.rb", false)
+repo.clone('/tmp/test_cloned_repo/', nil, ["/spec"], false)
+repo.clone('/tmp/test_cloned_repo2/', nil, ["*.rb"], false)
+repo.clone('/tmp/test_cloned_repo3/', nil, ["/spec/**"], false)
 #repo.destroy
 
 #repo2 = PackageProvider::Repository.new('https://ondrej.hosak@stash.cz.avg.com/scm/ddtf/onlinekitchen.git')

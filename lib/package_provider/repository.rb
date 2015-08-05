@@ -27,19 +27,14 @@ module PackageProvider
       begin
         Dir.mkdir(dest_dir)
 
-        puts "dir made #{dest_dir}"
         fetch(treeish)
 
-        puts "fetch"
-
-        File.open(File.join(repo_root, "info", "sparse-checkout"), 'w+') do |f|
+        File.open(File.join(repo_root, ".git", "info", "sparse-checkout"), 'w+') do |f|
           f.puts paths.join("\n")
         end
 
-        puts "clone"
-
-        o, e, s = Open3.capture3({}, "git", "clone", repo_root, { chdir: dest_dir })
-        processOutput(o, e, s, 'sparse-clone')
+        o, e, s = Open3.capture3({}, File.join(PackageProvider.root, 'lib', 'scripts', 'clone.sh'), dest_dir, treeish || "HEAD", { chdir: repo_root })
+        processOutput(o,e,s, 'sparse')
 
         dest_dir
       rescue
@@ -58,7 +53,7 @@ module PackageProvider
     private
 
     def init_repo!(git_repo_local_root)
-      o, e, s = Open3.capture3({}, File.join(PackageProvider.root, 'lib', 'scripts', 'clone.sh'), repo_url, git_repo_local_root || "", { chdir: repo_root })
+      o, e, s = Open3.capture3({}, File.join(PackageProvider.root, 'lib', 'scripts', 'init_repo.sh'), repo_url, git_repo_local_root || "", { chdir: repo_root })
       processOutput(o,e,s, 'clone')
     end
 
