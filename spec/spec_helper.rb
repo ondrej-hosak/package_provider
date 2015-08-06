@@ -1,4 +1,4 @@
-$: << 'lib'
+$LOAD_PATH << 'lib'
 require 'package_provider'
 require 'package_provider/repository'
 
