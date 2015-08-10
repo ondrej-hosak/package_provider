@@ -10,7 +10,7 @@ module PackageProvider
 
     class InvalidRepoPath < ArgumentError
     end
-
+    # rubocop:disable TrivialAccessors
     def self.temp_prefix=(tp)
       @temp_prefix = tp
     end
@@ -18,18 +18,18 @@ module PackageProvider
     def self.temp_prefix
       @temp_prefix || 'pp_repo_'
     end
-
-    def initialize(git_repo_url, git_repo_local_root = nil)
-      if git_repo_local_root
-        unless Dir.exist?(git_repo_local_root)
-          fail InvalidRepoPath, "Folder #{git_repo_local_root} does not exists"
+    # rubocop:enable TrivialAccessors
+    def initialize(git_repo_url, git_repo_local_cache_root = nil)
+      if git_repo_local_cache_root
+        unless Dir.exist?(git_repo_local_cache_root)
+          fail InvalidRepoPath, "#{git_repo_local_cache_root} does not exists"
         end
       end
 
       @repo_url = git_repo_url
       @repo_root = Dir.mktmpdir(self.class.temp_prefix)
 
-      init_repo!(git_repo_local_root)
+      init_repo!(git_repo_local_cache_root)
     end
 
     def clone(dest_dir, treeish, paths, use_submodules = false)
@@ -42,43 +42,41 @@ module PackageProvider
 
         fill_sparse_checkout_file(paths)
 
-        run_command(
-          'sparse',
-          {},
-          [
-            File.join(PackageProvider.root, 'lib', 'scripts', 'clone.sh'),
-            dest_dir,
-            treeish,
-            use_submodules
-          ],
-          chdir: repo_root
-        )
+        command = [
+          File.join(PackageProvider.root, 'lib', 'scripts', 'clone.sh'),
+          dest_dir,
+          treeish
+        ]
+
+        command << '--use-submodules' if use_submodules
+
+        run_command('sparse', {}, command, chdir: repo_root)
 
         dest_dir
       rescue => err
         FileUtils.rm_rf(dest_dir)
-        raise
+        raise err
       end
     end
-
+    # rubocop:disable UnusedMethodArgument
     def fetch(treeish = nil)
       fetch!
     end
-
+    # rubocop:enable UnusedMethodArgument
     def destroy
       FileUtils.rm_rf(@repo_root)
     end
 
     private
 
-    def init_repo!(git_repo_local_root)
+    def init_repo!(git_repo_local_cache_root)
       run_command(
         'clone',
         {},
         [
           File.join(PackageProvider.root, 'lib', 'scripts', 'init_repo.sh'),
           repo_url,
-          git_repo_local_root || ''
+          git_repo_local_cache_root || ''
         ],
         chdir: repo_root
       )
@@ -100,25 +98,23 @@ module PackageProvider
     end
 
     def fill_sparse_checkout_file(paths)
-      paths = ['/**'] if paths == nil
-      File.open(
-        a = File.join(repo_root, '.git', 'info', 'sparse-checkout'), 'w+'
-      ) do |f|
+      paths = ['/**'] if paths.nil?
+      path = File.join(repo_root, '.git', 'info', 'sparse-checkout')
+
+      File.open(path, 'w+') do |f|
         f.puts paths.join("\n")
       end
-      p a
     end
 
     def run_command(action, env_hash, params, options_hash)
       o, e, s = Open3.capture3(env_hash, *params, options_hash)
-      unless s.success?
-        puts action + ' failed:'
-        puts e
-        puts o
-        # PackageProvider.logger.debug o
-        # PackageProvider.logger.error e
-      end
-    end
+      return if s.success?
 
+      puts action + ' failed:'
+      puts e
+      puts o
+      # PackageProvider.logger.debug o
+      # PackageProvider.logger.error e
+    end
   end
 end

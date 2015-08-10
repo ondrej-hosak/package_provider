@@ -1,3 +1,4 @@
+# Namespace that handles git operations for PackageProvider
 module PackageProvider
   class << self
     def logger

@@ -9,6 +9,6 @@ use_submodules=$3
 GIT_INDEX_FILE="$dest_dir/.index" git --work-tree="$dest_dir" read-tree -m -u $treeish
 rm "$dest_dir/.index"
 
-if [use_submodules]; then
+if [ $use_submodules = '--use-submodules' ]; then
   git submodule update --init
 fi
