@@ -2,7 +2,7 @@ Style/EndOfLine:
   Enabled: false
 
 Metrics/MethodLength:
-  Max: 21
+  Max: 25
 
 Style/BlockComments:
   Enabled: false

@@ -5,4 +5,4 @@
 	symlinks = false
 	ignorecase = true
 [remote "origin"]
-	url = /tmp/testrepo/
+	url = /tmp/submodule_repo/

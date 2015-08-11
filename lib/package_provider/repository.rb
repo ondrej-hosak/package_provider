@@ -36,13 +36,13 @@ module PackageProvider
       PackageProvider.logger
     end
 
-    # rubocop:disable AbcSize
     def clone(dest_dir, treeish, paths, use_submodules = false)
       fail InvalidRepoPath, "Folder #{dest_dir} exists" if Dir.exist?(dest_dir)
 
-      logger.debug "clonning repo #{repo_root}: [dest_dir: #{dest_dir.inspect},\
-                    treeish: #{treeish.inspect},\
-                    use_submodules: #{use_submodules.inspect}]"
+      logger.debug "clonning repo #{repo_root}: " \
+                   " [dest_dir: #{dest_dir.inspect}, " \
+                   "treeish: #{treeish.inspect}, " \
+                   "use_submodules: #{use_submodules.inspect}]"
 
       begin
         Dir.mkdir(dest_dir)
@@ -51,6 +51,7 @@ module PackageProvider
         fill_sparse_checkout_file(paths)
         command = [
           File.join(PackageProvider.root, 'lib', 'scripts', 'clone.sh'),
+          repo_root,
           dest_dir,
           treeish
         ]
@@ -64,7 +65,7 @@ module PackageProvider
         raise
       end
     end
-    # rubocop:enable AbcSize
+
     # rubocop:disable UnusedMethodArgument
     def fetch(treeish = nil)
       fetch!
@@ -111,23 +112,18 @@ module PackageProvider
         f.puts paths.join("\n")
       end
     end
-    # rubocop:disable AbcSize
+
     def run_command(env_hash, params, options_hash)
       logger.debug "Running shell command: #{params.inspect}"
       o, e, s = Open3.capture3(env_hash, *params, options_hash)
 
       if s.success?
-        unless o.empty?
-          logger.info "Command #{params.inspect} returns #{o.inspect} on stdout"
-        end
-        unless e.empty?
-          logger.info "Command #{params.inspect} returns #{e.inspect} on stderr"
-        end
+        logger.info "Command #{params.inspect} returns #{o.inspect} on stdout" unless o.empty?
+        logger.info "Command #{params.inspect} returns #{e.inspect} on stderr" unless e.empty?
       else
-        logger.error "Command #{params.inspect} failed!\
-                      stdout: #{o.inspect}, stderr: #{e.inspect}"
+        logger.error "Command #{params.inspect} failed!" \
+                     "stdout: #{o.inspect}, stderr: #{e.inspect}"
       end
-      # rubocop:enable AbcSize
     end
   end
 end
