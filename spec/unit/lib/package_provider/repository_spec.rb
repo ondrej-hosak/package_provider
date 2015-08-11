@@ -1,5 +1,5 @@
 require 'pp'
-require 'fakefs'
+require 'fakefs/safe'
 
 describe PackageProvider::Repository do
   PackageProvider::Repository.temp_prefix = "pp_tests_#{rand(1000)}"
@@ -18,13 +18,12 @@ describe PackageProvider::Repository do
       'https://ondrej.hosak@stash.cz.avg.com/scm/ddtf/onlinekitchen.git')
   end
 
-  after(:each) do
-    repo.destroy
+  before(:all) do
+    FakeFS.activate!
   end
 
   after(:all) do
-    FileUtils.rm_rf(Dir["/tmp/#{PackageProvider::Repository.temp_prefix}*"])
-    FileUtils.rm_rf(Dir['/tmp/tt'])
+    FakeFS.deactivate!
   end
 
   describe '#initialize' do

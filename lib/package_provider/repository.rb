@@ -32,32 +32,39 @@ module PackageProvider
       init_repo!(git_repo_local_cache_root)
     end
 
+    def logger
+      PackageProvider.logger
+    end
+
+    # rubocop:disable AbcSize
     def clone(dest_dir, treeish, paths, use_submodules = false)
       fail InvalidRepoPath, "Folder #{dest_dir} exists" if Dir.exist?(dest_dir)
 
+      logger.debug "clonning repo #{repo_root}: [dest_dir: #{dest_dir.inspect},\
+                    treeish: #{treeish.inspect},\
+                    use_submodules: #{use_submodules.inspect}]"
+
       begin
         Dir.mkdir(dest_dir)
-
         fetch(treeish)
 
         fill_sparse_checkout_file(paths)
-
         command = [
           File.join(PackageProvider.root, 'lib', 'scripts', 'clone.sh'),
           dest_dir,
           treeish
         ]
-
         command << '--use-submodules' if use_submodules
-
-        run_command('sparse', {}, command, chdir: repo_root)
+        run_command({}, command, chdir: repo_root)
 
         dest_dir
       rescue => err
         FileUtils.rm_rf(dest_dir)
-        raise err
+        logger.error "Cannot clone repository #{repo_root}: #{err}"
+        raise
       end
     end
+    # rubocop:enable AbcSize
     # rubocop:disable UnusedMethodArgument
     def fetch(treeish = nil)
       fetch!
@@ -71,7 +78,6 @@ module PackageProvider
 
     def init_repo!(git_repo_local_cache_root)
       run_command(
-        'clone',
         {},
         [
           File.join(PackageProvider.root, 'lib', 'scripts', 'init_repo.sh'),
@@ -84,7 +90,6 @@ module PackageProvider
 
     def fetch!
       run_command(
-        'fetch',
         {},
         [
           'git',
@@ -101,20 +106,28 @@ module PackageProvider
       paths = ['/**'] if paths.nil?
       path = File.join(repo_root, '.git', 'info', 'sparse-checkout')
 
+      logger.debug "Setting sparse-checkout to: #{paths.join("\n")}"
       File.open(path, 'w+') do |f|
         f.puts paths.join("\n")
       end
     end
-
-    def run_command(action, env_hash, params, options_hash)
+    # rubocop:disable AbcSize
+    def run_command(env_hash, params, options_hash)
+      logger.debug "Running shell command: #{params.inspect}"
       o, e, s = Open3.capture3(env_hash, *params, options_hash)
-      return if s.success?
 
-      puts action + ' failed:'
-      puts e
-      puts o
-      # PackageProvider.logger.debug o
-      # PackageProvider.logger.error e
+      if s.success?
+        unless o.empty?
+          logger.info "Command #{params.inspect} returns #{o.inspect} on stdout"
+        end
+        unless e.empty?
+          logger.info "Command #{params.inspect} returns #{e.inspect} on stderr"
+        end
+      else
+        logger.error "Command #{params.inspect} failed!\
+                      stdout: #{o.inspect}, stderr: #{e.inspect}"
+      end
+      # rubocop:enable AbcSize
     end
   end
 end
