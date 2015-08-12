@@ -6,3 +6,6 @@ Metrics/MethodLength:
 
 Style/BlockComments:
   Enabled: false
+
+Metrics/AbcSize:
+  Max: 23

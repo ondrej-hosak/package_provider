@@ -1,4 +1,4 @@
-require 'pp'
+require 'pp' # required include because of superclass mismatch issue
 require 'fakefs/safe'
 
 describe PackageProvider::Repository do
@@ -9,7 +9,7 @@ describe PackageProvider::Repository do
     expect(status).to receive(:success?).and_return(true)
     expect(Open3).to(
       receive(:capture3)
-      .with({}, /.*init_repo.sh/, any_args)
+      .with({ 'ENV' => PackageProvider.env }, /.*init_repo.sh/, any_args)
       .once
       .and_return(['', '', status])
     )
@@ -56,7 +56,7 @@ describe PackageProvider::Repository do
 
       expect(Open3).to(
         receive(:capture3)
-        .with({}, /.*clone.sh/, any_args)
+        .with({ 'ENV' => PackageProvider.env }, /.*clone.sh/, any_args)
         .once.and_return(['', '', status])
       )
 

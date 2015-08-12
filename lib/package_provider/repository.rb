@@ -8,6 +8,12 @@ module PackageProvider
   class Repository
     attr_reader :repo_url, :repo_root
 
+    CLONE_SCRIPT = File.join(PackageProvider.root, 'lib', 'scripts', 'clone.sh')
+    INIT_SCRIPT = File.join(PackageProvider.root,
+                            'lib',
+                            'scripts',
+                            'init_repo.sh')
+
     class InvalidRepoPath < ArgumentError
     end
     # rubocop:disable TrivialAccessors
@@ -20,10 +26,9 @@ module PackageProvider
     end
     # rubocop:enable TrivialAccessors
     def initialize(git_repo_url, git_repo_local_cache_root = nil)
-      if git_repo_local_cache_root
-        unless Dir.exist?(git_repo_local_cache_root)
-          fail InvalidRepoPath, "#{git_repo_local_cache_root} does not exists"
-        end
+      if git_repo_local_cache_root && !Dir.exist?(git_repo_local_cache_root)
+        fail InvalidRepoPath,
+             "Directory #{git_repo_local_cache_root.inspect} does not exists"
       end
 
       @repo_url = git_repo_url
@@ -49,15 +54,13 @@ module PackageProvider
         fetch(treeish)
 
         fill_sparse_checkout_file(paths)
-        command = [
-          File.join(PackageProvider.root, 'lib', 'scripts', 'clone.sh'),
-          repo_root,
-          dest_dir,
-          treeish
-        ]
-        command << '--use-submodules' if use_submodules
-        run_command({}, command, chdir: repo_root)
 
+        command = [CLONE_SCRIPT]
+        command << '--use-submodules' if use_submodules
+        command.concat [repo_root, dest_dir, treeish]
+
+        run_command({ 'ENV' => PackageProvider.env }, command, chdir: repo_root)
+        # touch .package_provider_ready
         dest_dir
       rescue => err
         FileUtils.rm_rf(dest_dir)
@@ -79,9 +82,9 @@ module PackageProvider
 
     def init_repo!(git_repo_local_cache_root)
       run_command(
-        {},
+        { 'ENV' => PackageProvider.env },
         [
-          File.join(PackageProvider.root, 'lib', 'scripts', 'init_repo.sh'),
+          INIT_SCRIPT,
           repo_url,
           git_repo_local_cache_root || ''
         ],
@@ -94,8 +97,6 @@ module PackageProvider
         {},
         [
           'git',
-          '-c',
-          'http.sslverify=false',
           'fetch',
           '--all'
         ],
@@ -118,8 +119,10 @@ module PackageProvider
       o, e, s = Open3.capture3(env_hash, *params, options_hash)
 
       if s.success?
-        logger.info "Command #{params.inspect} returns #{o.inspect} on stdout" unless o.empty?
-        logger.info "Command #{params.inspect} returns #{e.inspect} on stderr" unless e.empty?
+        logger.info "Command #{params.inspect}" \
+                    "returns #{o.inspect} on stdout" unless o.empty?
+        logger.info "Command #{params.inspect}" \
+                    "returns #{e.inspect} on stderr" unless e.empty?
       else
         logger.error "Command #{params.inspect} failed!" \
                      "stdout: #{o.inspect}, stderr: #{e.inspect}"

@@ -18,5 +18,15 @@ module PackageProvider
     def root
       File.expand_path('../..', __FILE__)
     end
+
+    def env
+      system_env || 'development'
+    end
+
+    private
+
+    def system_env
+      ENV['ENV'] || ENV['RACK_ENV'] || ENV['RAILS_ENV'] || ENV['APP_ENV']
+    end
   end
 end
