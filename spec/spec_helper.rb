@@ -1,3 +1,6 @@
+require "codeclimate-test-reporter"
+CodeClimate::TestReporter.start
+
 ENV['ENV'] = ENV['RACK_ENV'] = ENV['RAILS_ENV'] = ENV['APP_ENV'] = 'test'
 
 $LOAD_PATH << 'lib'
