@@ -9,6 +9,42 @@ based on user specification. You can download specific
 folders from multiple repositories and combine them  
 into one zip file.
 
+Endpoints
+---------
+```
+GET  /api/v1/uptime
+
+GET  /repositories
+POST /repositories/reload
+GET  /repositories/:alias
+
+POST /packages/download
+GET  /packages/download/:package_hash
+```
+
+Request for package
+-------------------
+
+Plan text format (make sure you set text/plain content type)
+```
+repistory_url|branch:treeish(folder_name_in_repository>folder_name_in_archive)
+```
+
+Json format
+```
+[
+  {
+     repository: repository_url,
+     commit: treeish,
+     branch: branch,
+     folderOverride: [
+          { source: folder_name_in_repository, destinationOverride: folder_name_in_archive } 
+     ]
+  }
+]
+```
+Where branch or treeish is required. Folder override part is not required. If you don't specify folder override, that config settings are used. You can combine multiple repositories and folders from repositories. You can use
+repository alias insted of repository url. List of aliases is in config/repository_aliases.yml file.
 
 
 Prerequisites for development on windows machine
