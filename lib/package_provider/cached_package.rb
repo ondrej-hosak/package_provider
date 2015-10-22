@@ -35,7 +35,8 @@ module PackageProvider
 
       def errors(package_request_or_fingerprint)
         fp = package_request_fingerprint(package_request_or_fingerprint)
-        File.read(file_path) if File.exist?(package_path(fp) + ERROR)
+        return unless File.exist?(package_path(fp) + ERROR)
+        File.read(package_path(fp) + ERROR)
       end
 
       private
@@ -64,13 +65,17 @@ module PackageProvider
 
     def cache_package
       lock_package
-      return if File.exist?(@path + PACKAGE_READY)
+      if File.exist?(@path + PACKAGE_READY)
+        Metriks.meter('packageprovider.package.cached').mark
+        return
+      end
       begin
         FileUtils.mkdir_p(@path)
         pack
         package_ready!
       rescue => err
         PackageProvider.logger.error("Create package failed: #{err}")
+        Metriks.meter('packageprovider.package.error').mark
         FileUtils.rm_rf(@path)
       end
     ensure
