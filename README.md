@@ -1,7 +1,7 @@
 [![Build Status](https://travis-ci.org/AVGTechnologies/package_provider.svg)](https://travis-ci.org/AVGTechnologies/package_provider)
 [![Code Climate](https://codeclimate.com/github/AVGTechnologies/package_provider/badges/gpa.svg)](https://codeclimate.com/github/AVGTechnologies/package_provider)
 [![Test Coverage](https://codeclimate.com/github/ondrej-hosak/package_provider/badges/coverage.svg)](https://codeclimate.com/github/ondrej-hosak/package_provider/coverage)
-[![License](license-apache-2.svg)](https://github.com/AVGTechnologies/package_provider/blob/master/LICENSE)
+[![License](https://github.com/ondrej-hosak/package_provider/blob/master/license-apache-2.svg)](https://github.com/AVGTechnologies/package_provider/blob/master/LICENSE)
 
 
 Package provider
