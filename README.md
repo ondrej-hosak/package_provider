@@ -1,6 +1,8 @@
 [![Build Status](https://travis-ci.org/AVGTechnologies/package_provider.svg)](https://travis-ci.org/AVGTechnologies/package_provider)
 [![Code Climate](https://codeclimate.com/github/AVGTechnologies/package_provider/badges/gpa.svg)](https://codeclimate.com/github/AVGTechnologies/package_provider)
 [![Test Coverage](https://codeclimate.com/github/ondrej-hosak/package_provider/badges/coverage.svg)](https://codeclimate.com/github/ondrej-hosak/package_provider/coverage)
+[![License](license-apache-2.svg)](https://github.com/AVGTechnologies/package_provider/blob/master/LICENSE)
+
 
 Package provider
 ================
@@ -38,7 +40,7 @@ Json format
      commit: treeish,
      branch: branch,
      folderOverride: [
-          { source: folder_name_in_repository, destinationOverride: folder_name_in_archive } 
+          { source: folder_name_in_repository, destinationOverride: folder_name_in_archive }
      ]
   }
 ]
